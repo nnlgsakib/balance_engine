@@ -80,6 +80,10 @@ pub enum Trust {
     Verified,
     /// Held, but no list names it.
     Unverified,
+    /// Shown, with a warning: it takes the symbol of a listed token or of the
+    /// chain's coin, on another contract. Often a fake, sometimes a real
+    /// bridged or older copy, so it is never hidden for this alone.
+    Suspicious(Reason),
     /// Looks like a scam: hidden until the user shows it.
     Spam(Reason),
 }

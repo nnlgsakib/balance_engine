@@ -5,7 +5,7 @@ Live balances and discovery of every coin, token and NFT a wallet holds, on EVM 
 - **Several public RPCs per chain.** Endpoints are ranked by health and speed. A node that rate-limits, errors or sits behind a firewall is benched for a while, and a slow one is hedged. EVM nodes must report the right chain id, and a node that falls behind the others is passed over.
 - **The index suggests, the chain decides.** Token lists, transfer logs, Blockscout and Solana DAS only name candidates. Every amount reported is read from the chain in that round, at one block. A failed read is reported as an error, never as a zero.
 - **Standards.** Native coins, ERC-20, ERC-721, ERC-1155, ERC-404, SPL Token, Token-2022, and Metaplex NFTs (Token Metadata, editions, pNFT, Core, compressed).
-- **Trust.** Every holding is marked `Verified` (on a shipped list, or added by the user), `Unverified`, or `Spam` (lures, links, invisible characters, impersonating a listed symbol, flagged by an index).
+- **Trust.** Every holding is marked `Verified` (on a shipped list, or added by the user), `Unverified`, `Suspicious` (takes a listed token's symbol on another contract: shown with a warning, never hidden for that alone), or `Spam` (lures, links, invisible characters, flagged by an index).
 - **Live.** One task per chain polls at the chain's pace (EVM 15 s, Solana 20 s, Bitcoin 60 s) and does a full pass every 3 minutes. `kick` triggers a pass now, and `pause` / `resume` follow the app between foreground and background.
 
 It depends on the sibling `registry` crate (`path = "../registry"`) for chains, RPC lists and token lists.

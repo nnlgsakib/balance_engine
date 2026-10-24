@@ -1,6 +1,11 @@
 //! How far a found asset is trusted. Anyone can deploy a token with any name
-//! and send it to any wallet, so only a list makes a token verified; the
-//! rest is unverified, or spam when it looks like a lure.
+//! and send it to any wallet, so only a list makes a token verified.
+//!
+//! As in Phantom and Rabby, a copied symbol is a warning, not a verdict: a
+//! token named "USDT" on another contract is often a fake, and sometimes a
+//! real bridged or older copy. It is shown as suspicious, unpriced and out of
+//! the total. Only lures are hidden as spam: an index's flag, a link, bait
+//! words, or invisible characters.
 
 use crate::model::{Asset, Reason, Standard, Trust};
 use registry::model::{ChainInfo, TokenInfo};
@@ -105,7 +110,7 @@ pub fn classify(asset: &Asset, chain: &ChainInfo, tokens: &[TokenInfo]) -> Trust
         let copies = !symbol.is_empty()
             && (symbol == native || listed(chain).iter().any(|t| folded(&t.symbol) == symbol));
         if copies {
-            return Trust::Spam(Reason::Impersonates);
+            return Trust::Suspicious(Reason::Impersonates);
         }
     }
     Trust::Unverified
@@ -144,9 +149,11 @@ mod tests {
         let cases = [
             (asset(usdt, "USDT", "Tether USD"), Trust::Verified),
             (asset(&usdt.to_lowercase(), "USDT", "Tether USD"), Trust::Verified),
-            (asset(other, "USDT", "Tether USD"), Trust::Spam(Reason::Impersonates)),
-            (asset(other, "U.S.D.T", "Tether"), Trust::Spam(Reason::Impersonates)),
-            (asset(other, "ETH", "Ether"), Trust::Spam(Reason::Impersonates)),
+            (asset(other, "USDT", "Tether USD"), Trust::Suspicious(Reason::Impersonates)),
+            (asset(other, "U.S.D.T", "Tether"), Trust::Suspicious(Reason::Impersonates)),
+            (asset(other, "ETH", "Ether"), Trust::Suspicious(Reason::Impersonates)),
+            // A lookalike that also baits is spam.
+            (asset(other, "USDT", "Claim your USDT at usdt-gift.com"), Trust::Spam(Reason::Link)),
             (asset(other, "Visit eth-gift.com", "x"), Trust::Spam(Reason::Link)),
             (asset(other, "CLAIM", "Claim your reward now"), Trust::Spam(Reason::Lure)),
             (asset(other, "US\u{200B}DT", "Tether"), Trust::Spam(Reason::Invisible)),
@@ -187,7 +194,7 @@ mod tests {
         a.standard = Standard::Spl;
         assert_eq!(classify(&a, &sol, &[]), Trust::Verified);
         a.contract = Some(usdc.to_lowercase());
-        assert_eq!(classify(&a, &sol, &[]), Trust::Spam(Reason::Impersonates));
+        assert_eq!(classify(&a, &sol, &[]), Trust::Suspicious(Reason::Impersonates));
     }
 
     #[test]
