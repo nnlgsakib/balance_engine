@@ -129,7 +129,7 @@ fn key(target: &Target) -> String {
 
 impl Engine {
     /// `user_agent` names the wallet to the nodes and APIs it asks, e.g.
-    /// `"Nira Wallet/1.0"`.
+    /// `"Example Wallet/1.0"`.
     pub fn new(user_agent: &str) -> Engine {
         Engine { inner: Arc::new(Inner { pool: rpc::Pool::new(user_agent), last: Mutex::default() }) }
     }
